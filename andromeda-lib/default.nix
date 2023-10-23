@@ -1,5 +1,5 @@
 # The role of this file is to bootstrap the
-# Snowfall library. There is some duplication shared between this
+# andromeda library. There is some duplication shared between this
 # file and the library itself due to the library needing to pass through
 # another extended library for its own applications.
 core-inputs: user-options: let
@@ -23,13 +23,6 @@ core-inputs: user-options: let
   # the values are the inputs' `lib` attribute. Entries without a `lib`
   # attribute are removed.
   get-libs = attrs: let
-    # # @PERF(jakehamilton): Replace filter+map with a fold.
-    # attrs-with-libs =
-    #   filterAttrs
-    #   (_name: value: builtins.isAttrs (value.lib or null))
-    #   attrs;
-    # libs =
-    #   builtins.mapAttrs (_name: input: input.lib) attrs-with-libs;
     libs =
       foldlAttrs (acc: name: v:
         acc
@@ -48,16 +41,16 @@ core-inputs: user-options: let
   * RAW CONFIG *
   *************
   */
-  raw-snowfall-config = user-options.snowfall or {};
-  snowfall-config =
-    raw-snowfall-config
+  raw-andromeda-config = user-options.andromeda or {};
+  andromeda-config =
+    raw-andromeda-config
     // {
       inherit (user-options) src;
-      root = raw-snowfall-config.root or user-options.src;
-      namespace = raw-snowfall-config.namespace or "internal";
+      root = raw-andromeda-config.root or user-options.src;
+      namespace = raw-andromeda-config.namespace or "internal";
       meta = {
-        name = raw-snowfall-config.meta.name or null;
-        title = raw-snowfall-config.meta.title or null;
+        name = raw-andromeda-config.meta.name or null;
+        title = raw-andromeda-config.meta.title or null;
       };
     };
 
@@ -67,33 +60,33 @@ core-inputs: user-options: let
 
   # This root is different to accomodate the creation
   # of a fake user-lib in order to run documentation on this flake.
-  snowfall-lib-root = "${core-inputs.src}/snowfall-lib";
-  snowfall-lib-dirs = let
-    files = builtins.readDir snowfall-lib-root;
+  andromeda-lib-root = "${core-inputs.src}/andromeda-lib";
+  andromeda-lib-dirs = let
+    files = builtins.readDir andromeda-lib-root;
     dirs = filterAttrs (_name: kind: kind == "directory") files;
     names = builtins.attrNames dirs;
   in
     names;
 
-  snowfall-lib = fix (
-    snowfall-lib: let
-      attrs = {inherit snowfall-lib snowfall-config core-inputs user-inputs;};
+  andromeda-lib = fix (
+    andromeda-lib: let
+      attrs = {inherit andromeda-lib andromeda-config core-inputs user-inputs;};
       libs =
         builtins.map
-        (dir: import "${snowfall-lib-root}/${dir}" attrs)
-        snowfall-lib-dirs;
+        (dir: import "${andromeda-lib-root}/${dir}" attrs)
+        andromeda-lib-dirs;
     in
       merge-deep libs
   );
 
-  snowfall-top-level-lib = filterAttrs (_name: value: !builtins.isAttrs value) snowfall-lib;
+  andromeda-top-level-lib = filterAttrs (_name: value: !builtins.isAttrs value) andromeda-lib;
 
   base-lib = merge-shallow [
     core-inputs.nixpkgs.lib
     core-inputs-libs
     user-inputs-libs
-    snowfall-top-level-lib
-    {snowfall = snowfall-lib;}
+    andromeda-top-level-lib
+    {andromeda = andromeda-lib;}
   ];
 
   /*
@@ -102,14 +95,14 @@ core-inputs: user-options: let
   ***********
   */
   user-lib-root = "${user-inputs.src}/lib";
-  user-lib-modules = snowfall-lib.fs.get-default-nix-files-recursive user-lib-root;
+  user-lib-modules = andromeda-lib.fs.get-default-nix-files-recursive user-lib-root;
 
   user-lib = fix (
     user-lib: let
       attrs = {
         inherit (user-options) inputs;
-        snowfall-inputs = core-inputs;
-        lib = merge-shallow [base-lib {${snowfall-config.namespace} = user-lib;}];
+        andromeda-inputs = core-inputs;
+        lib = merge-shallow [base-lib {${andromeda-config.namespace} = user-lib;}];
       };
       libs =
         builtins.map

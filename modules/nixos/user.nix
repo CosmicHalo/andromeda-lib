@@ -5,9 +5,9 @@ args @ {
   ...
 }: let
   inherit (lib) types mkOption mkDefault foldl optionalAttrs optional;
-  inherit (lib.snowfall.module) mkOpt' mkBoolOpt;
+  inherit (lib.andromeda.module) mkOpt' mkBoolOpt;
 
-  cfg = config.snowfallorg;
+  cfg = config.andromeda;
   inputs = args.inputs or {};
   user-names = builtins.attrNames cfg.user;
 
@@ -26,7 +26,7 @@ args @ {
       };
     });
 in {
-  options.snowfallorg = with types; {
+  options.andromeda = with types; {
     user = mkOption {
       default = {};
       description = "User configuration.";

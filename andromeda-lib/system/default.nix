@@ -1,7 +1,7 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (builtins) baseNameOf;
@@ -9,8 +9,8 @@
 
   virtual-systems = import ./virtual-systems.nix;
 
-  user-systems-root = snowfall-lib.fs.get-snowfall-file "systems";
-  user-modules-root = snowfall-lib.fs.get-snowfall-file "modules";
+  user-systems-root = andromeda-lib.fs.get-andromeda-file "systems";
+  user-modules-root = andromeda-lib.fs.get-andromeda-file "modules";
 in {
   system = rec {
     is-linux = hasInfix "linux";
@@ -19,8 +19,8 @@ in {
 
     ## Get the name of a system based on its file path.
     get-inferred-system-name = path:
-      if snowfall-lib.path.has-file-extension "nix" path
-      then snowfall-lib.path.get-parent-directory path
+      if andromeda-lib.path.has-file-extension "nix" path
+      then andromeda-lib.path.get-parent-directory path
       else baseNameOf path;
 
     ## Get the virtual system type of a system target.
@@ -37,7 +37,7 @@ in {
 
     ## Get structured data about all systems for a given target.
     get-target-systems-metadata = target: let
-      systems = snowfall-lib.fs.get-directories target;
+      systems = andromeda-lib.fs.get-directories target;
       existing-systems = builtins.filter (system: builtins.pathExists "${system}/default.nix") systems;
       create-system-metadata = path: {
         path = "${path}/default.nix";
@@ -144,8 +144,8 @@ in {
       systems ? {},
       homes ? {},
     }: let
-      lib = snowfall-lib.internal.system-lib;
-      home-system-modules = snowfall-lib.home.create-home-system-modules homes;
+      lib = andromeda-lib.internal.system-lib;
+      home-system-modules = andromeda-lib.home.create-home-system-modules homes;
       home-manager-module =
         if is-darwin system
         then user-inputs.home-manager.darwinModules.home-manager
@@ -163,7 +163,7 @@ in {
           host = name;
 
           virtual = (get-virtual-system-type target) != "";
-          inputs = snowfall-lib.flake.without-src user-inputs;
+          inputs = andromeda-lib.flake.without-src user-inputs;
         };
     };
 
@@ -173,12 +173,12 @@ in {
       homes ? {},
       systems ? {},
     }: let
-      targets = snowfall-lib.fs.get-directories user-systems-root;
+      targets = andromeda-lib.fs.get-directories user-systems-root;
       target-systems-metadata = concatMap get-target-systems-metadata targets;
-      user-nixos-modules = snowfall-lib.module.create-modules {
+      user-nixos-modules = andromeda-lib.module.create-modules {
         src = "${user-modules-root}/nixos";
       };
-      user-darwin-modules = snowfall-lib.module.create-modules {
+      user-darwin-modules = andromeda-lib.module.create-modules {
         src = "${user-modules-root}/darwin";
       };
       nixos-modules = systems.modules.nixos or [];
@@ -240,6 +240,6 @@ in {
           target-systems-metadata
       );
     in
-      snowfall-lib.attrs.merge-shallow [host-systems created-systems];
+      andromeda-lib.attrs.merge-shallow [host-systems created-systems];
   };
 }

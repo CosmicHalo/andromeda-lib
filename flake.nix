@@ -47,6 +47,8 @@
   };
 
   outputs = inputs: let
+    inherit (inputs.flake-utils.lib) defaultSystems eachSystemMap;
+
     core-inputs =
       inputs
       // {
@@ -55,16 +57,16 @@
 
     # Create the library, extending the nixpkgs library and merging
     # libraries from other inputs
-    mkLib = import ./snowfall-lib core-inputs;
+    mkLib = import ./andromeda-lib core-inputs;
 
     # A convenience wrapper to create the library and then call `lib.mkFlake`.
     mkFlake = flake-and-lib-options @ {
       src,
       inputs,
-      snowfall ? {},
+      andromeda ? {},
       ...
     }: let
-      lib = mkLib {inherit inputs src snowfall;};
+      lib = mkLib {inherit inputs src andromeda;};
       flake-options = builtins.removeAttrs flake-and-lib-options ["inputs" "src"];
     in
       lib.mkFlake flake-options;
@@ -75,17 +77,17 @@
     homeModules = ./modules/home/default.nix;
     darwinModules = ./modules/darwin/default.nix;
 
-    _snowfall = rec {
+    _andromeda = rec {
       raw-config = config;
 
       config = {
         root = ./.;
         src = ./.;
-        namespace = "snowfall";
-        lib-dir = "snowfall-lib";
+        namespace = "andromeda";
+        lib-dir = "andromeda-lib";
 
         meta = {
-          name = "snowfall-lib";
+          name = "andromeda-lib";
           title = "Andromeda Galaxy Lib";
         };
       };
@@ -97,8 +99,16 @@
         };
       in
         builtins.removeAttrs
-        lib.snowfall
+        lib.andromeda
         ["internal"];
     };
+
+    devShell = eachSystemMap defaultSystems (system: let
+      pkgs = import inputs.nixpkgs {
+        inherit system;
+        overlays = [inputs.devshell.overlays.default];
+      };
+    in
+      pkgs.devshell.mkShell (import ./devShell.nix {inherit pkgs;}));
   };
 }

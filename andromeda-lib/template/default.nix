@@ -1,12 +1,12 @@
 {
   core-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (builtins) baseNameOf;
   inherit (core-inputs.nixpkgs.lib) foldl mapAttrs;
 
-  user-templates-root = snowfall-lib.fs.get-snowfall-file "templates";
+  user-templates-root = andromeda-lib.fs.get-andromeda-file "templates";
 in {
   template = {
     ## Create flake templates.
@@ -15,7 +15,7 @@ in {
       overrides ? {},
       alias ? {},
     }: let
-      user-templates = snowfall-lib.fs.get-directories src;
+      user-templates = andromeda-lib.fs.get-directories src;
       create-template-metadata = template: {
         name = builtins.unsafeDiscardStringContext (baseNameOf template);
         path = template;

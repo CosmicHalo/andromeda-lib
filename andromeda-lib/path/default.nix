@@ -1,6 +1,6 @@
 {
   core-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (builtins) toString baseNameOf dirOf concatStringsSep;
@@ -13,7 +13,7 @@ in {
     split-file-extension = file: let
       match = builtins.match file-name-regex file;
     in
-      assert assertMsg (match != null) "lib.snowfall.split-file-extension: File must have an extension to split."; match;
+      assert assertMsg (match != null) "lib.andromeda.split-file-extension: File must have an extension to split."; match;
 
     ## Check if a file name has a file extension.
     has-any-file-extension = file: let
@@ -37,7 +37,7 @@ in {
       else false;
 
     ## Get the parent directory for a given path.
-    get-parent-directory = snowfall-lib.fp.compose baseNameOf dirOf;
+    get-parent-directory = andromeda-lib.fp.compose baseNameOf dirOf;
 
     ## Get the file name of a path without its extension.
     get-file-name-without-extension = path: let

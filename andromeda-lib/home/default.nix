@@ -1,7 +1,7 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit
@@ -17,8 +17,8 @@
     mkAliasAndWrapDefinitions
     ;
 
-  user-homes-root = snowfall-lib.fs.get-snowfall-file "homes";
-  user-modules-root = snowfall-lib.fs.get-snowfall-file "modules";
+  user-homes-root = andromeda-lib.fs.get-andromeda-file "homes";
+  user-modules-root = andromeda-lib.fs.get-andromeda-file "modules";
 in {
   home = rec {
     # Modules in home-manager expect `hm` to be available directly on `lib` itself.
@@ -27,14 +27,14 @@ in {
       # not exist.
       if user-inputs ? home-manager
       then
-        snowfall-lib.internal.system-lib.extend
+        andromeda-lib.internal.system-lib.extend
         (_final: prev:
           # This order is important, this library's extend and other utilities must write
           # _over_ the original `system-lib`.
-            snowfall-lib.internal.system-lib
+            andromeda-lib.internal.system-lib
             // prev
             // {
-              inherit (snowfall-lib.internal.system-lib.home-manager) hm;
+              inherit (andromeda-lib.internal.system-lib.home-manager) hm;
             })
       else {};
 
@@ -54,7 +54,7 @@ in {
 
     ## Get structured data about all homes for a given target.
     get-target-homes-metadata = target: let
-      homes = snowfall-lib.fs.get-directories target;
+      homes = andromeda-lib.fs.get-directories target;
       existing-homes = builtins.filter (home: builtins.pathExists "${home}/default.nix") homes;
       create-home-metadata = path: {
         path = "${path}/default.nix";
@@ -74,7 +74,7 @@ in {
     ## Create a home.
     create-home = {
       path,
-      name ? builtins.unsafeDiscardStringContext (snowfall-lib.system.get-inferred-system-name path),
+      name ? builtins.unsafeDiscardStringContext (andromeda-lib.system.get-inferred-system-name path),
       modules ? [],
       specialArgs ? {},
       channelName ? "nixpkgs",
@@ -87,7 +87,7 @@ in {
       lib = home-lib;
     in
       assert assertMsg (user-inputs ? home-manager) "In order to create home-manager configurations, you must include `home-manager` as a flake input.";
-      assert assertMsg (user-metadata.host != "") "Snowfall Lib homes must be named with the format: user@system"; {
+      assert assertMsg (user-metadata.host != "") "Andromeda Lib homes must be named with the format: user@system"; {
         inherit channelName system;
 
         output = "homeConfigurations";
@@ -98,7 +98,7 @@ in {
           inherit (user-metadata) user host;
 
           format = "home";
-          inputs = snowfall-lib.flake.without-src user-inputs;
+          inputs = andromeda-lib.flake.without-src user-inputs;
 
           # home-manager has trouble with `pkgs` recursion if it isn't passed in here.
           inherit pkgs lib;
@@ -119,7 +119,7 @@ in {
                         inherit user-inputs core-inputs;
                       }))
                   {
-                    snowfallorg.user = {
+                    andromeda.user = {
                       enable = mkDefault true;
                       name = mkDefault user-metadata.user;
                     };
@@ -132,10 +132,10 @@ in {
 
     ## Create all available homes.
     create-homes = homes: let
-      targets = snowfall-lib.fs.get-directories user-homes-root;
+      targets = andromeda-lib.fs.get-directories user-homes-root;
       target-homes-metadata = concatMap get-target-homes-metadata targets;
 
-      user-home-modules = snowfall-lib.module.create-modules {
+      user-home-modules = andromeda-lib.module.create-modules {
         src = "${user-modules-root}/home";
       };
 
@@ -166,7 +166,7 @@ in {
     ## Create system modules for home-manager integration.
     create-home-system-modules = users: let
       created-users = create-homes users;
-      user-home-modules = snowfall-lib.module.create-modules {
+      user-home-modules = andromeda-lib.module.create-modules {
         src = "${user-modules-root}/home";
       };
 
@@ -180,8 +180,8 @@ in {
         })
         user-home-modules;
 
-      snowfall-user-home-module = {
-        _file = "virtual:snowfallorg/modules/home/default.nix";
+      andromeda-user-home-module = {
+        _file = "virtual:andromeda/modules/home/default.nix";
         config = {
           home-manager.sharedModules = [
             core-inputs.self.homeModules
@@ -197,17 +197,17 @@ in {
         target ? system,
         format ? "home",
         system ? pkgs.system,
-        virtual ? (snowfall-lib.system.is-virtual target),
+        virtual ? (andromeda-lib.system.is-virtual target),
         ...
       }: {
-        _file = "virtual:snowfallorg/home/extra-special-args";
+        _file = "virtual:andromeda/home/extra-special-args";
 
         config = {
           home-manager.extraSpecialArgs = {
             inherit system target format virtual systems host;
 
             lib = home-lib;
-            inputs = snowfall-lib.flake.without-src user-inputs;
+            inputs = andromeda-lib.flake.without-src user-inputs;
           };
         };
       };
@@ -230,7 +230,7 @@ in {
               host-matches = created-user.specialArgs.host == host;
 
               # To conform to the config structure of home-manager, we have to
-              # remap the options coming from `snowfallorg.user.<name>.home.config` since `mkAliasDefinitions`
+              # remap the options coming from `andromeda.user.<name>.home.config` since `mkAliasDefinitions`
               # does not let us target options within a submodule.
               wrap-user-options = user-option:
                 if (user-option ? "_type") && user-option._type == "merge"
@@ -248,32 +248,32 @@ in {
                 else
                   (builtins.trace ''
                     =============
-                    Snowfall Lib:
-                    Option value for `snowfallorg.user.${user-name}` was not detected to be merged.
+                    Andromeda Lib:
+                    Option value for `andromeda.user.${user-name}` was not detected to be merged.
 
                     Please report the issue on GitHub with a link to your configuration so we can debug the problem:
-                      https://github.com/snowfallorg/lib/issues/new
+                      https://github.com/andromeda/lib/issues/new
                     =============
                   '')
                   user-option;
             in {
-              _file = "virtual:snowfallorg/home/user/${name}";
+              _file = "virtual:andromeda/home/user/${name}";
 
               config = mkIf host-matches {
                 # Initialize user information.
-                snowfallorg = {
+                andromeda = {
                   home.extraOptions = {
                     xdg.enable = true;
-                    home.file = config.snowfallorg.home.file;
-                    xdg.configFile = config.snowfallorg.home.configFile;
-                    home.stateVersion = config.snowfallorg.home.stateVersion;
+                    home.file = config.andromeda.home.file;
+                    xdg.configFile = config.andromeda.home.configFile;
+                    home.stateVersion = config.andromeda.home.stateVersion;
                   };
 
                   user.${user-name}.home = {
                     config =
-                      config.snowfallorg.home.extraOptions
+                      config.andromeda.home.extraOptions
                       // {
-                        snowfallorg.user = {
+                        andromeda.user = {
                           enable = true;
                           name = mkDefault user-name;
                         };
@@ -282,8 +282,8 @@ in {
                 };
 
                 home-manager = {
-                  users.${user-name} = mkAliasAndWrapDefinitions wrap-user-options options.snowfallorg.user;
-                  sharedModules = other-modules ++ optional config.snowfallorg.user.${user-name}.home.enable user-module;
+                  users.${user-name} = mkAliasAndWrapDefinitions wrap-user-options options.andromeda.user;
+                  sharedModules = other-modules ++ optional config.andromeda.user.${user-name}.home.enable user-module;
                 };
               };
             }
@@ -292,7 +292,7 @@ in {
     in
       [
         extra-special-args-module
-        snowfall-user-home-module
+        andromeda-user-home-module
       ]
       ++ (users.modules or [])
       ++ shared-modules

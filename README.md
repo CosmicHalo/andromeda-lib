@@ -1,4 +1,4 @@
-# Snowfall Lib
+# Andromeda Lib
 
 <a href="https://nixos.wiki/wiki/Flakes" target="_blank">
 	<img alt="Nix Flakes Ready" src="https://img.shields.io/static/v1?logo=nixos&logoColor=d8dee9&label=Nix%20Flakes&labelColor=5e81ac&message=Ready&color=d8dee9&style=for-the-badge">
@@ -25,9 +25,19 @@
 >
 > _Snowfall Lib is built on top of [flake-utils-plus](https://github.com/gytis-ivaskevicius/flake-utils-plus)._
 
+This is a fork of [Snowfall Lib](https://github.com/snowfallorg/lib) with some additions and changes
+to fit my personal use case.
+
+Things added/modified:
+
+- Merge `user-modules` with self defined `hosts` within `mkFlake`.
+- Extend `user` config to accept home options to be merged back with `home-manager`.
+- Add more `option` functions to help construct `options` more easily.
+- Update `nixosModules`, `darwinModules`, and `homeModules` on flake to be more easily used within mkFlake.
+  
 ## Get Started
 
-See the Snowfall Lib [Quickstart](https://snowfall.org/guides/lib/quickstart/) guide to start using Snowfall Lib.
+See the Snowfall Lib [Quickstart](https://snowfall.org/guides/lib/quickstart/) guide to start using Andromeda Lib.
 
 ## Reference
 

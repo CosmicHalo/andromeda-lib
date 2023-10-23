@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (core-inputs.flake-utils-plus.lib) filterPackages;
   inherit (core-inputs.nixpkgs.lib) foldl mapAttrs callPackageWith;
 
-  user-packages-root = snowfall-lib.fs.get-snowfall-file "packages";
+  user-packages-root = andromeda-lib.fs.get-andromeda-file "packages";
 in {
   package = {
     ## Create flake output packages.
@@ -19,7 +19,7 @@ in {
       alias ? {},
       package-namespace ? "internal",
     }: let
-      user-packages = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-packages = andromeda-lib.fs.get-default-nix-files-recursive src;
       create-package-metadata = package: let
         namespaced-packages = {
           ${package-namespace} = packages-without-aliases;
@@ -29,12 +29,12 @@ in {
           // namespaced-packages
           // {
             inherit channels;
-            lib = snowfall-lib.internal.system-lib;
+            lib = andromeda-lib.internal.system-lib;
             pkgs = pkgs // namespaced-packages;
-            inputs = snowfall-lib.flake.without-snowfall-inputs user-inputs;
+            inputs = andromeda-lib.flake.without-andromeda-inputs user-inputs;
           };
       in {
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory package);
+        name = builtins.unsafeDiscardStringContext (andromeda-lib.path.get-parent-directory package);
         drv = let
           pkg = callPackageWith extra-inputs package {};
         in
@@ -43,7 +43,7 @@ in {
             meta =
               (pkg.meta or {})
               // {
-                snowfall = {
+                andromeda = {
                   path = package;
                 };
               };

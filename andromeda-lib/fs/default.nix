@@ -1,8 +1,8 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
-  snowfall-config,
+  andromeda-lib,
+  andromeda-config,
   ...
 }: let
   inherit (builtins) readDir pathExists;
@@ -18,8 +18,8 @@ in {
     ## Get a file path relative to the user's flake.
     get-file = path: "${user-inputs.src}/${path}";
 
-    ## Get a file path relative to the user's snowfall directory.
-    get-snowfall-file = path: "${snowfall-config.root}/${path}";
+    ## Get a file path relative to the user's andromeda directory.
+    get-andromeda-file = path: "${andromeda-config.root}/${path}";
 
     ## Get a file path relative to the this flake.
     internal-get-file = path: "${core-inputs.src}/${path}";
@@ -58,7 +58,7 @@ in {
         then get-files-recursive path'
         else path';
       files =
-        snowfall-lib.attrs.map-concat-attrs-to-list
+        andromeda-lib.attrs.map-concat-attrs-to-list
         map-file
         filtered-entries;
     in
@@ -67,13 +67,13 @@ in {
     ## Get nix files at a given path.
     get-nix-files = path:
       builtins.filter
-      (snowfall-lib.path.has-file-extension "nix")
+      (andromeda-lib.path.has-file-extension "nix")
       (get-files path);
 
     ## Get nix files at a given path, traversing any directories within.
     get-nix-files-recursive = path:
       builtins.filter
-      (snowfall-lib.path.has-file-extension "nix")
+      (andromeda-lib.path.has-file-extension "nix")
       (get-files-recursive path);
 
     ## Get nix files at a given path named "default.nix".
@@ -93,7 +93,7 @@ in {
       builtins.filter
       (
         name:
-          (snowfall-lib.path.has-file-extension "nix" name)
+          (andromeda-lib.path.has-file-extension "nix" name)
           && (builtins.baseNameOf name != "default.nix")
       )
       (get-files path);
@@ -103,7 +103,7 @@ in {
       builtins.filter
       (
         name:
-          (snowfall-lib.path.has-file-extension "nix" name)
+          (andromeda-lib.path.has-file-extension "nix" name)
           && (builtins.baseNameOf name != "default.nix")
       )
       (get-files-recursive path);

@@ -1,16 +1,15 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (core-inputs.nixpkgs.lib) foldl mapAttrs hasPrefix;
 
-  user-modules-root = snowfall-lib.fs.get-snowfall-file "modules";
+  user-modules-root = andromeda-lib.fs.get-andromeda-file "modules";
 in {
   module =
     import ./options.nix {inherit (core-inputs.nixpkgs) lib;}
-    // {}
     // {
       ## Create flake output modules.
       create-modules = {
@@ -18,7 +17,7 @@ in {
         overrides ? {},
         src ? "${user-modules-root}/nixos",
       }: let
-        user-modules = snowfall-lib.fs.get-default-nix-files-recursive src;
+        user-modules = andromeda-lib.fs.get-default-nix-files-recursive src;
         create-module-metadata = module: {
           name = let
             path-name = builtins.replaceStrings [src "/default.nix"] ["" ""] (builtins.unsafeDiscardStringContext module);
@@ -40,26 +39,26 @@ in {
               target = args.target or system;
 
               format = let
-                virtual-system-type = snowfall-lib.system.get-virtual-system-type target;
+                virtual-system-type = andromeda-lib.system.get-virtual-system-type target;
               in
                 if virtual-system-type != ""
                 then virtual-system-type
-                else if snowfall-lib.system.is-darwin target
+                else if andromeda-lib.system.is-darwin target
                 then "darwin"
                 else "linux";
 
-              # Replicates the specialArgs from Snowfall Lib's system builder.
+              # Replicates the specialArgs from Andromeda Lib's system builder.
               modified-args =
                 args
                 // {
                   inherit system target format;
-                  virtual = args.virtual or (snowfall-lib.system.get-virtual-system-type target != "");
+                  virtual = args.virtual or (andromeda-lib.system.get-virtual-system-type target != "");
                   systems = args.systems or {};
 
-                  lib = snowfall-lib.internal.system-lib;
+                  lib = andromeda-lib.internal.system-lib;
                   pkgs = user-inputs.self.pkgs.${system}.nixpkgs;
 
-                  inputs = snowfall-lib.flake.without-src user-inputs;
+                  inputs = andromeda-lib.flake.without-src user-inputs;
                 };
               user-module = import metadata.path modified-args;
             in

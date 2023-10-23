@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (core-inputs.flake-utils-plus.lib) filterPackages;
   inherit (core-inputs.nixpkgs.lib) foldl mapAttrs callPackageWith;
 
-  user-shells-root = snowfall-lib.fs.get-snowfall-file "shells";
+  user-shells-root = andromeda-lib.fs.get-andromeda-file "shells";
 in {
   shell = {
     ## Create flake output packages.
@@ -18,18 +18,18 @@ in {
       src ? user-shells-root,
       pkgs ? channels.nixpkgs,
     }: let
-      user-shells = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-shells = andromeda-lib.fs.get-default-nix-files-recursive src;
 
       create-shell-metadata = shell: let
         extra-inputs =
           pkgs
           // {
             inherit channels;
-            lib = snowfall-lib.internal.system-lib;
-            inputs = snowfall-lib.flake.without-src user-inputs;
+            lib = andromeda-lib.internal.system-lib;
+            inputs = andromeda-lib.flake.without-src user-inputs;
           };
       in {
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory shell);
+        name = builtins.unsafeDiscardStringContext (andromeda-lib.path.get-parent-directory shell);
         drv = callPackageWith extra-inputs shell {};
       };
 

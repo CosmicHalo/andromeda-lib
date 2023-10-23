@@ -1,13 +1,13 @@
 {
   core-inputs,
   user-inputs,
-  snowfall-lib,
+  andromeda-lib,
   ...
 }: let
   inherit (core-inputs.nixpkgs.lib) foldl;
 
-  user-overlays-root = snowfall-lib.fs.get-snowfall-file "overlays";
-  user-packages-root = snowfall-lib.fs.get-snowfall-file "packages";
+  user-overlays-root = andromeda-lib.fs.get-andromeda-file "overlays";
+  user-packages-root = andromeda-lib.fs.get-andromeda-file "packages";
 in {
   overlay = {
     ## Create a flake-utils-plus overlays builder.
@@ -16,10 +16,10 @@ in {
       package-namespace ? "internal",
       extra-overlays ? [],
     }: channels: let
-      user-overlays = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-overlays = andromeda-lib.fs.get-default-nix-files-recursive src;
       create-overlay = overlay: import overlay (user-inputs // {inherit channels;});
       user-packages-overlay = final: prev: let
-        user-packages = snowfall-lib.package.create-packages {
+        user-packages = andromeda-lib.package.create-packages {
           pkgs = final;
           inherit channels;
         };
@@ -47,12 +47,12 @@ in {
         system = "fake-system";
       };
 
-      user-overlays = snowfall-lib.fs.get-default-nix-files-recursive src;
+      user-overlays = andromeda-lib.fs.get-default-nix-files-recursive src;
 
       channel-systems = user-inputs.self.pkgs;
 
       user-packages-overlay = final: prev: let
-        user-packages = snowfall-lib.package.create-packages {
+        user-packages = andromeda-lib.package.create-packages {
           pkgs = final;
           channels = channel-systems.${prev.system};
         };
@@ -66,7 +66,7 @@ in {
         };
 
       create-overlay = overlays: file: let
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory file);
+        name = builtins.unsafeDiscardStringContext (andromeda-lib.path.get-parent-directory file);
         overlay = final: prev: let
           channels = channel-systems.${prev.system};
           user-overlay = import file (user-inputs // {inherit channels;});
@@ -107,12 +107,12 @@ in {
         {}
         user-overlays;
 
-      user-packages = snowfall-lib.fs.get-default-nix-files-recursive packages-src;
+      user-packages = andromeda-lib.fs.get-default-nix-files-recursive packages-src;
 
       create-package-overlay = package-overlays: file: let
-        name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory file);
+        name = builtins.unsafeDiscardStringContext (andromeda-lib.path.get-parent-directory file);
         overlay = _final: prev: let
-          packages = snowfall-lib.package.create-packages {
+          packages = andromeda-lib.package.create-packages {
             channels = channel-systems.${prev.system};
           };
         in
@@ -143,7 +143,7 @@ in {
         package-overlays-results = builtins.map (overlay: overlay final prev) package-overlays-list;
 
         merged-results =
-          snowfall-lib.attrs.merge-shallow-packages
+          andromeda-lib.attrs.merge-shallow-packages
           (package-overlays-results ++ overlays-results);
       in
         merged-results;

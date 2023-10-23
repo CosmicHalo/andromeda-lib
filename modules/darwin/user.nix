@@ -7,7 +7,7 @@
 }: let
   inherit (lib) types mkOption mkDefault foldl optionalAttrs;
 
-  cfg = config.snowfallorg;
+  cfg = config.andromeda;
   user-names = builtins.attrNames cfg.user;
 
   create-system-users = system-users: name: let
@@ -21,7 +21,7 @@
       };
     });
 in {
-  options.snowfallorg = {
+  options.andromeda = {
     user = mkOption {
       description = "User configuration.";
       default = {};

@@ -6,7 +6,7 @@ inputs @ {
 }: let
   inherit (lib) types mkOption mkIf mkDefault;
 
-  cfg = config.snowfallorg;
+  cfg = config.andromeda;
 
   has-user-name = (cfg.user.name or null) != null;
   # The module system chokes if it finds `osConfig` named in the module arguments
@@ -20,7 +20,7 @@ inputs @ {
     then "/Users/${cfg.user.name}"
     else "/home/${cfg.user.name}";
 in {
-  options.snowfallorg = {
+  options.andromeda = {
     user = {
       enable = mkOption {
         type = types.bool;
