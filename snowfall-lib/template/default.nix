@@ -33,7 +33,7 @@ in {
         };
 
       templates-without-aliases = foldl merge-templates {} templates-metadata;
-      aliased-templates = mapAttrs (name: value: templates-without-aliases.${value}) alias;
+      aliased-templates = mapAttrs (_name: value: templates-without-aliases.${value}) alias;
       templates = templates-without-aliases // aliased-templates // overrides;
     in
       templates;

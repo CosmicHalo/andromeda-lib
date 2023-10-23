@@ -41,7 +41,7 @@ in {
         };
 
       shells-without-aliases = foldl merge-shells {} shells-metadata;
-      aliased-shells = mapAttrs (name: value: shells-without-aliases.${value}) alias;
+      aliased-shells = mapAttrs (_name: value: shells-without-aliases.${value}) alias;
       shells = shells-without-aliases // aliased-shells // overrides;
     in
       filterPackages pkgs.system shells;

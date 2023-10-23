@@ -111,7 +111,7 @@ in {
 
       create-package-overlay = package-overlays: file: let
         name = builtins.unsafeDiscardStringContext (snowfall-lib.path.get-parent-directory file);
-        overlay = final: prev: let
+        overlay = _final: prev: let
           packages = snowfall-lib.package.create-packages {
             channels = channel-systems.${prev.system};
           };

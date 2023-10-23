@@ -56,7 +56,7 @@ in {
           ${metadata.name} = metadata.drv;
         };
       packages-without-aliases = foldl merge-packages {} packages-metadata;
-      aliased-packages = mapAttrs (name: value: packages-without-aliases.${value}) alias;
+      aliased-packages = mapAttrs (_name: value: packages-without-aliases.${value}) alias;
       packages = packages-without-aliases // aliased-packages // overrides;
     in
       filterPackages pkgs.system packages;

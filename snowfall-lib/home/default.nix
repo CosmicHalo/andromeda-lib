@@ -28,7 +28,7 @@ in {
       if user-inputs ? home-manager
       then
         snowfall-lib.internal.system-lib.extend
-        (final: prev:
+        (_final: prev:
           # This order is important, this library's extend and other utilities must write
           # _over_ the original `system-lib`.
             snowfall-lib.internal.system-lib
@@ -142,7 +142,7 @@ in {
 
       user-home-modules-list =
         mapAttrsToList
-        (module-path: module: args @ {pkgs, ...}:
+        (module-path: module: args @ { ...}:
           (module args)
           // {
             _file = "${user-homes-root}/${module-path}/default.nix";
@@ -223,7 +223,6 @@ in {
             user-name = created-user.specialArgs.user;
           in
             {
-              pkgs,
               config,
               options,
               host ? "",

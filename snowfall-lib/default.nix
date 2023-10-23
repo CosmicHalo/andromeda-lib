@@ -16,10 +16,10 @@ core-inputs: user-options: let
     # @PERF(jakehamilton): Replace filter+map with a fold.
     attrs-with-libs =
       filterAttrs
-      (name: value: builtins.isAttrs (value.lib or null))
+      (_name: value: builtins.isAttrs (value.lib or null))
       attrs;
     libs =
-      builtins.mapAttrs (name: input: input.lib) attrs-with-libs;
+      builtins.mapAttrs (_name: input: input.lib) attrs-with-libs;
   in
     libs;
 
@@ -50,7 +50,7 @@ core-inputs: user-options: let
   snowfall-lib-root = "${core-inputs.src}/snowfall-lib";
   snowfall-lib-dirs = let
     files = builtins.readDir snowfall-lib-root;
-    dirs = filterAttrs (name: kind: kind == "directory") files;
+    dirs = filterAttrs (_name: kind: kind == "directory") files;
     names = builtins.attrNames dirs;
   in
     names;
@@ -68,7 +68,7 @@ core-inputs: user-options: let
       merge-deep libs
   );
 
-  snowfall-top-level-lib = filterAttrs (name: value: !builtins.isAttrs value) snowfall-lib;
+  snowfall-top-level-lib = filterAttrs (_name: value: !builtins.isAttrs value) snowfall-lib;
 
   base-lib = merge-shallow [
     core-inputs.nixpkgs.lib

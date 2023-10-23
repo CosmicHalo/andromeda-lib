@@ -37,10 +37,10 @@ in rec {
       # @PERF(jakehamilton): Replace filter+map with a fold.
       attrs-with-libs =
         filterAttrs
-        (name: value: builtins.isAttrs (value.lib or null))
+        (_name: value: builtins.isAttrs (value.lib or null))
         attrs;
       libs =
-        builtins.mapAttrs (name: input: input.lib) attrs-with-libs;
+        builtins.mapAttrs (_name: input: input.lib) attrs-with-libs;
     in
       libs;
   };
