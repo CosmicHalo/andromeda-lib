@@ -98,10 +98,9 @@ in {
           inherit (user-metadata) user host;
 
           format = "home";
-
           inputs = snowfall-lib.flake.without-src user-inputs;
 
-          # @NOTE(jakehamilton): home-manager has trouble with `pkgs` recursion if it isn't passed in here.
+          # home-manager has trouble with `pkgs` recursion if it isn't passed in here.
           inherit pkgs lib;
         };
 
@@ -121,8 +120,8 @@ in {
                       }))
                   {
                     snowfallorg.user = {
-                      name = mkDefault user-metadata.user;
                       enable = mkDefault true;
+                      name = mkDefault user-metadata.user;
                     };
                   }
                 ];
@@ -142,7 +141,7 @@ in {
 
       user-home-modules-list =
         mapAttrsToList
-        (module-path: module: args @ { ...}:
+        (module-path: module: args:
           (module args)
           // {
             _file = "${user-homes-root}/${module-path}/default.nix";
@@ -262,25 +261,27 @@ in {
 
               config = mkIf host-matches {
                 # Initialize user information.
-                snowfallorg.user.${user-name}.home = {
-                  config = {
-                    snowfallorg.user = {
-                      enable = true;
-                      name = mkDefault user-name;
-                    };
+                snowfallorg = {
+                  home.extraOptions = {
+                    xdg.enable = true;
+                    home.file = config.snowfallorg.home.file;
+                    xdg.configFile = config.snowfallorg.home.configFile;
+                    home.stateVersion = config.snowfallorg.home.stateVersion;
                   };
 
-                  extraOptions = {
-                    xdg.enable = true;
-                    home.file = config.snowfallorg.user.${user-name}.home.file;
-                    xdg.configFile = config.snowfallorg.user.${user-name}.home.configFile;
-                    home.stateVersion = config.snowfallorg.user.${user-name}.home.stateVersion;
+                  user.${user-name}.home = {
+                    config =
+                      config.snowfallorg.home.extraOptions
+                      // {
+                        snowfallorg.user = {
+                          enable = true;
+                          name = mkDefault user-name;
+                        };
+                      };
                   };
                 };
 
                 home-manager = {
-                  inherit (config.snowfallorg.user.${user-name}.home) useGlobalPkgs useUserPackages;
-
                   users.${user-name} = mkAliasAndWrapDefinitions wrap-user-options options.snowfallorg.user;
                   sharedModules = other-modules ++ optional config.snowfallorg.user.${user-name}.home.enable user-module;
                 };

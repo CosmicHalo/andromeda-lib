@@ -3,7 +3,17 @@
 # file and the library itself due to the library needing to pass through
 # another extended library for its own applications.
 core-inputs: user-options: let
-  inherit (core-inputs.nixpkgs.lib) assertMsg fix filterAttrs mergeAttrs fold recursiveUpdate callPackageWith;
+  inherit
+    (core-inputs.nixpkgs.lib)
+    assertMsg
+    fix
+    filterAttrs
+    mergeAttrs
+    fold
+    recursiveUpdate
+    callPackageWith
+    foldlAttrs
+    ;
 
   merge-shallow = fold mergeAttrs {};
   merge-deep = fold recursiveUpdate {};
@@ -13,13 +23,23 @@ core-inputs: user-options: let
   # the values are the inputs' `lib` attribute. Entries without a `lib`
   # attribute are removed.
   get-libs = attrs: let
-    # @PERF(jakehamilton): Replace filter+map with a fold.
-    attrs-with-libs =
-      filterAttrs
-      (_name: value: builtins.isAttrs (value.lib or null))
-      attrs;
+    # # @PERF(jakehamilton): Replace filter+map with a fold.
+    # attrs-with-libs =
+    #   filterAttrs
+    #   (_name: value: builtins.isAttrs (value.lib or null))
+    #   attrs;
+    # libs =
+    #   builtins.mapAttrs (_name: input: input.lib) attrs-with-libs;
     libs =
-      builtins.mapAttrs (_name: input: input.lib) attrs-with-libs;
+      foldlAttrs (acc: name: v:
+        acc
+        // (
+          if builtins.isAttrs (v.lib or null)
+          then {${name} = v.lib;}
+          else {}
+        ))
+      {}
+      attrs;
   in
     libs;
 
@@ -57,9 +77,7 @@ core-inputs: user-options: let
 
   snowfall-lib = fix (
     snowfall-lib: let
-      attrs = {
-        inherit snowfall-lib snowfall-config core-inputs user-inputs;
-      };
+      attrs = {inherit snowfall-lib snowfall-config core-inputs user-inputs;};
       libs =
         builtins.map
         (dir: import "${snowfall-lib-root}/${dir}" attrs)

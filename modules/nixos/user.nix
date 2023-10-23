@@ -5,7 +5,7 @@ args @ {
   ...
 }: let
   inherit (lib) types mkOption mkDefault foldl optionalAttrs optional;
-  inherit (lib.snowfall.module) mkOpt mkOpt' mkBoolOpt;
+  inherit (lib.snowfall.module) mkOpt' mkBoolOpt;
 
   cfg = config.snowfallorg;
   inputs = args.inputs or {};
@@ -39,22 +39,7 @@ in {
 
           home = {
             enable = mkBoolOpt true "Whether to enable home-manager for this user.";
-
             path = mkOpt' str "/home/${name}";
-            stateVersion = mkOpt str "23.11" "The version of home-manager to use.";
-
-            useGlobalPkgs = mkBoolOpt false "Whether to use global packages.";
-            useUserPackages = mkBoolOpt false "Whether to use user packages.";
-
-            file =
-              mkOpt attrs {}
-              "A set of files to be managed by home-manager's `home.file`.";
-            configFile =
-              mkOpt attrs {}
-              "A set of files to be managed by home-manager's `xdg.configFile`.";
-            extraOptions =
-              mkOpt attrs {}
-              "Options to pass directly to home-manager.";
 
             config = mkOption {
               default = {};
