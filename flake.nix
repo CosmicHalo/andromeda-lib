@@ -71,7 +71,11 @@
     in
       lib.mkFlake flake-options;
   in {
-    inherit mkLib mkFlake;
+    lib =
+      inputs.flake-utils-plus.lib
+      // {
+        inherit mkLib mkFlake;
+      };
 
     nixosModules = ./modules/nixos/default.nix;
     homeModules = ./modules/home/default.nix;

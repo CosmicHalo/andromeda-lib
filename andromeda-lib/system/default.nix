@@ -4,8 +4,8 @@
   andromeda-lib,
   ...
 }: let
-  inherit (builtins) baseNameOf;
-  inherit (core-inputs.nixpkgs.lib) assertMsg fix hasInfix concatMap foldl optionals foldlAttrs;
+  inherit (builtins) baseNameOf isNull;
+  inherit (core-inputs.nixpkgs.lib) assertMsg fix hasInfix concatMap foldl optionals foldlAttrs optionalAttrs;
 
   virtual-systems = import ./virtual-systems.nix;
 
@@ -73,47 +73,23 @@ in {
           (args
             // {
               format = virtual-system-type;
-              specialArgs =
-                args.specialArgs
-                // {
-                  format = virtual-system-type;
-                };
-              modules =
-                args.modules
-                ++ [
-                  core-inputs.self.nixosModules
-                ];
+              specialArgs = args.specialArgs // {format = virtual-system-type;};
+              modules = args.modules ++ [core-inputs.self.nixosModules];
             });
       darwin-system-builder = args:
         assert assertMsg (user-inputs ? darwin) "In order to create virtual systems, you must include `darwin` as a flake input.";
           user-inputs.darwin.lib.darwinSystem
           ((builtins.removeAttrs args ["system" "modules"])
             // {
-              specialArgs =
-                args.specialArgs
-                // {
-                  format = "darwin";
-                };
-              modules =
-                args.modules
-                ++ [
-                  core-inputs.self.darwinModules
-                ];
+              specialArgs = args.specialArgs // {format = "darwin";};
+              modules = args.modules ++ [core-inputs.self.darwinModules];
             });
       linux-system-builder = args:
         core-inputs.nixpkgs.lib.nixosSystem
         (args
           // {
-            specialArgs =
-              args.specialArgs
-              // {
-                format = "linux";
-              };
-            modules =
-              args.modules
-              ++ [
-                core-inputs.self.nixosModules
-              ];
+            specialArgs = args.specialArgs // {format = "linux";};
+            modules = args.modules ++ [core-inputs.self.nixosModules];
           });
     in
       if virtual-system-type != ""
@@ -132,17 +108,18 @@ in {
 
     ## Create a system.
     create-system = {
-      target ? "x86_64-linux",
-      system ? get-resolved-system-target target,
-      path,
-      name ? builtins.unsafeDiscardStringContext (get-inferred-system-name path),
-      modules ? [],
-      specialArgs ? {},
-      channelName ? "nixpkgs",
-      builder ? get-system-builder target,
-      output ? get-system-output target,
-      systems ? {},
+      path ? null,
       homes ? {},
+      modules ? [],
+      systems ? {},
+      extraArgs ? {},
+      specialArgs ? {},
+      target ? "x86_64-linux",
+      channelName ? "nixpkgs",
+      output ? get-system-output target,
+      builder ? get-system-builder target,
+      system ? get-resolved-system-target target,
+      name ? builtins.unsafeDiscardStringContext (get-inferred-system-name path),
     }: let
       lib = andromeda-lib.internal.system-lib;
       home-system-modules = andromeda-lib.home.create-home-system-modules homes;
@@ -154,14 +131,24 @@ in {
     in {
       inherit channelName system builder output;
 
-      modules = [path] ++ modules ++ (optionals (user-inputs ? home-manager) home-manager-modules);
+      modules =
+        modules
+        ++ (optionals (!isNull path) [path])
+        ++ (optionals (user-inputs ? home-manager) home-manager-modules)
+        ++ [
+          {
+            # at this point we assume, that an evaluator at least
+            # uses nixpkgs.lib to evaluate modules.
+            _module.args = (optionalAttrs (output != "darwinConfigurations") {inputs = andromeda-lib.flake.without-src user-inputs;}) // extraArgs;
+          }
+        ];
 
       specialArgs =
         specialArgs
         // {
           inherit target system systems lib;
-          host = name;
 
+          host = name;
           virtual = (get-virtual-system-type target) != "";
           inputs = andromeda-lib.flake.without-src user-inputs;
         };

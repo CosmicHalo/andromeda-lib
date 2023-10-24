@@ -263,10 +263,15 @@ in {
                 # Initialize user information.
                 andromeda = {
                   home.extraOptions = {
-                    xdg.enable = true;
-                    home.file = config.andromeda.home.file;
-                    xdg.configFile = config.andromeda.home.configFile;
-                    home.stateVersion = config.andromeda.home.stateVersion;
+                    xdg = {
+                      enable = true;
+                      configFile = config.andromeda.home.configFile;
+                    };
+
+                    home = {
+                      file = config.andromeda.home.file;
+                      stateVersion = config.andromeda.home.stateVersion;
+                    };
                   };
 
                   user.${user-name}.home = {

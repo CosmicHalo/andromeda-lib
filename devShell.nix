@@ -13,7 +13,7 @@
         set -e
         echo -e "\n\n##### Building ${name}\n"
         cd ${rootDir}/tests/${name}
-        nix flake show --allow-import-from-derivation --no-write-lock-file "$@"
+        nix flake show --all-systems --allow-import-from-derivation --no-write-lock-file "$@"
         nix flake check --no-write-lock-file "$@"
       '';
     };
@@ -25,7 +25,7 @@
         set -e
         echo -e "\n\n##### Building ${example}-${host}\n"
         cd ${rootDir}/examples/${example}
-        nix flake show --no-write-lock-file "$@"
+        nix flake show --all-systems --no-write-lock-file "$@"
         nix build .#nixosConfigurations.${host}.config.system.build.toplevel --no-write-lock-file --no-link "$@"
       '';
     };
@@ -70,19 +70,9 @@ in {
       command = "nix build ${rootDir}/examples/darwin#darwinConfigurations.Hostname1.system --no-write-lock-file --dry-run";
     }
 
-    # (test "channel-patching")
-    # (test "derivation-outputs")
-    # (test "hosts-config")
-    # (test "overlays-flow")
+    (test "nixosConfigurations")
     # (test "all" // {command = "check-channel-patching && check-derivation-outputs && check-hosts-config && check-overlays-flow";})
 
     # (dry-nixos-build "minimal-multichannel" "Hostname1")
-    # (dry-nixos-build "minimal-multichannel" "Hostname2")
-    # (dry-nixos-build "home-manager+nur+neovim" "Rick")
-    # (dry-nixos-build "exporters" "Morty")
-    # (withCategory "dry-build" {
-    #   name = "build-all";
-    #   command = "build-exporters-Morty && build-home-manager+nur+neovim-Rick && build-minimal-multichannel-Hostname1 && build-minimal-multichannel-Hostname2";
-    # })
   ];
 }

@@ -52,26 +52,34 @@ in rec {
     custom-flake-options = flake.without-andromeda-options full-flake-options;
     package-namespace = full-flake-options.package-namespace or andromeda-config.namespace or "internal";
 
+    ##############
     # Systems
+    ##############
     systems = andromeda-lib.system.create-systems {
       homes = full-flake-options.homes or {};
       systems = full-flake-options.systems or {};
       hosts = full-flake-options.systems.hosts or {};
     };
 
+    ##############
     # Overlays
+    ##############
     overlays = andromeda-lib.overlay.create-overlays {
       inherit package-namespace;
       extra-overlays = full-flake-options.extra-exported-overlays or {};
     };
 
+    ##############
     # Templates
+    ##############
     templates = andromeda-lib.template.create-templates {
       overrides = full-flake-options.templates or {};
       alias = alias.templates or {};
     };
 
+    ##############
     # Modules
+    ##############
     nixos-modules = andromeda-lib.module.create-modules {
       src = andromeda-lib.fs.get-andromeda-file "modules/nixos";
       overrides = full-flake-options.modules.nixos or {};
@@ -92,6 +100,22 @@ in rec {
     homes = andromeda-lib.home.create-homes (full-flake-options.homes or {});
     hosts = andromeda-lib.attrs.merge-shallow [systems homes];
 
+    ##############
+    # Channels
+    ##############
+    channels =
+      {
+        nixpkgs.overlaysBuilder = andromeda-lib.overlay.create-overlays-builder {
+          inherit package-namespace;
+          extra-overlays = full-flake-options.overlays or [];
+        };
+      }
+      // full-flake-options.channels or {};
+    channelsConfig = full-flake-options.channels-config or {};
+
+    ##############
+    # Output Builders
+    ##############
     outputs-builder = channels: let
       user-outputs-builder =
         full-flake-options.outputs-builder
@@ -122,7 +146,7 @@ in rec {
     flake-options =
       custom-flake-options
       // {
-        inherit hosts templates;
+        inherit hosts templates channels channelsConfig;
         inherit (user-inputs) self;
 
         lib = andromeda-lib.internal.user-lib;
@@ -132,12 +156,10 @@ in rec {
         darwinModules = darwin-modules;
         homeModules = home-modules;
 
-        channelsConfig = full-flake-options.channels-config or {};
-
-        channels.nixpkgs.overlaysBuilder = andromeda-lib.overlay.create-overlays-builder {
-          inherit package-namespace;
-          extra-overlays = full-flake-options.overlays or [];
-        };
+        # channels.nixpkgs.overlaysBuilder = andromeda-lib.overlay.create-overlays-builder {
+        #   inherit package-namespace;
+        #   extra-overlays = full-flake-options.overlays or [];
+        # };
 
         outputsBuilder = outputs-builder;
 
