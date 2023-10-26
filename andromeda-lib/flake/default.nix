@@ -61,6 +61,29 @@ in rec {
       hosts = full-flake-options.systems.hosts or {};
     };
 
+    alias = full-flake-options.alias or {};
+    homes = andromeda-lib.home.create-homes (full-flake-options.homes or {});
+    hosts = andromeda-lib.attrs.merge-shallow [systems homes];
+
+    ##############
+    # Modules
+    ##############
+    nixos-modules = andromeda-lib.module.create-modules {
+      alias = alias.modules.nixos or {};
+      overrides = full-flake-options.modules.nixos or {};
+      src = andromeda-lib.fs.get-andromeda-file "modules/nixos";
+    };
+    darwin-modules = andromeda-lib.module.create-modules {
+      alias = alias.modules.darwin or {};
+      overrides = full-flake-options.modules.darwin or {};
+      src = andromeda-lib.fs.get-andromeda-file "modules/darwin";
+    };
+    home-modules = andromeda-lib.module.create-modules {
+      alias = alias.modules.home or {};
+      overrides = full-flake-options.modules.home or {};
+      src = andromeda-lib.fs.get-andromeda-file "modules/home";
+    };
+
     ##############
     # Overlays
     ##############
@@ -78,44 +101,21 @@ in rec {
     };
 
     ##############
-    # Modules
-    ##############
-    nixos-modules = andromeda-lib.module.create-modules {
-      src = andromeda-lib.fs.get-andromeda-file "modules/nixos";
-      overrides = full-flake-options.modules.nixos or {};
-      alias = alias.modules.nixos or {};
-    };
-    darwin-modules = andromeda-lib.module.create-modules {
-      src = andromeda-lib.fs.get-andromeda-file "modules/darwin";
-      overrides = full-flake-options.modules.darwin or {};
-      alias = alias.modules.darwin or {};
-    };
-    home-modules = andromeda-lib.module.create-modules {
-      src = andromeda-lib.fs.get-andromeda-file "modules/home";
-      overrides = full-flake-options.modules.home or {};
-      alias = alias.modules.home or {};
-    };
-
-    alias = full-flake-options.alias or {};
-    homes = andromeda-lib.home.create-homes (full-flake-options.homes or {});
-    hosts = andromeda-lib.attrs.merge-shallow [systems homes];
-
-    ##############
     # Channels
     ##############
     channels =
-      {
+      (full-flake-options.channels or {})
+      // {
         nixpkgs.overlaysBuilder = andromeda-lib.overlay.create-overlays-builder {
           inherit package-namespace;
           extra-overlays = full-flake-options.overlays or [];
         };
-      }
-      // full-flake-options.channels or {};
+      };
     channelsConfig = full-flake-options.channels-config or {};
 
-    ##############
+    ##################
     # Output Builders
-    ##############
+    ##################
     outputs-builder = channels: let
       user-outputs-builder =
         full-flake-options.outputs-builder
@@ -152,15 +152,12 @@ in rec {
         lib = andromeda-lib.internal.user-lib;
         inputs = andromeda-lib.flake.without-src user-inputs;
 
+        # Modules
+        homeModules = home-modules;
         nixosModules = nixos-modules;
         darwinModules = darwin-modules;
-        homeModules = home-modules;
 
-        # channels.nixpkgs.overlaysBuilder = andromeda-lib.overlay.create-overlays-builder {
-        #   inherit package-namespace;
-        #   extra-overlays = full-flake-options.overlays or [];
-        # };
-
+        # Outputs
         outputsBuilder = outputs-builder;
 
         _andromeda = {

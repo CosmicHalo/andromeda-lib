@@ -72,7 +72,7 @@ in {
 
                         config = {
                           submoduleSupport.enable = true;
-                          submoduleSupport.externalPackageInstall = cfg.useUserPackages;
+                          submoduleSupport.externalPackageInstall = config.home-manager.useUserPackages;
 
                           nix.package = config.nix.package;
                           home.username = config.users.users.${name}.name;

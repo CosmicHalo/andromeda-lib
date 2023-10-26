@@ -168,8 +168,10 @@ in {
       user-darwin-modules = andromeda-lib.module.create-modules {
         src = "${user-modules-root}/darwin";
       };
+
       nixos-modules = systems.modules.nixos or [];
       darwin-modules = systems.modules.darwin or [];
+      system-specialArgs = systems.specialArgs or {};
 
       # Get all modules for a given target.
       get-modules = target: overrides: let
@@ -187,9 +189,18 @@ in {
       create-system' = created-systems: system-metadata: let
         overrides = systems.hosts.${system-metadata.name} or {};
         modules = get-modules system-metadata.target (overrides.modules or []);
+
+        system-metadata-extra =
+          system-metadata
+          // {
+            specialArgs =
+              system-specialArgs
+              // (overrides.specialArgs or {})
+              // (system-metadata.specialArgs or {});
+          };
       in {
         ${system-metadata.name} = create-system (overrides
-          // system-metadata
+          // system-metadata-extra
           // {
             inherit homes modules;
             systems = created-systems;

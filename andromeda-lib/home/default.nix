@@ -14,6 +14,7 @@
     mkIf
     mapAttrsToList
     mkDefault
+    mkAliasDefinitions
     mkAliasAndWrapDefinitions
     ;
 
@@ -74,11 +75,11 @@ in {
     ## Create a home.
     create-home = {
       path,
-      name ? builtins.unsafeDiscardStringContext (andromeda-lib.system.get-inferred-system-name path),
       modules ? [],
       specialArgs ? {},
       channelName ? "nixpkgs",
       system ? "x86_64-linux",
+      name ? builtins.unsafeDiscardStringContext (andromeda-lib.system.get-inferred-system-name path),
     }: let
       user-metadata = split-user-and-host name;
 
@@ -135,6 +136,7 @@ in {
       targets = andromeda-lib.fs.get-directories user-homes-root;
       target-homes-metadata = concatMap get-target-homes-metadata targets;
 
+      homes-specialArgs = homes.specialArgs or {};
       user-home-modules = andromeda-lib.module.create-modules {
         src = "${user-modules-root}/home";
       };
@@ -151,11 +153,23 @@ in {
       create-home' = home-metadata: let
         inherit (home-metadata) name;
         overrides = homes.users.${name} or {};
+
+        home-metadata-extra =
+          home-metadata
+          // {
+            specialArgs =
+              homes-specialArgs
+              // (overrides.specialArgs or {})
+              // (home-metadata.specialArgs or {});
+          };
       in {
         "${name}" = create-home (overrides
-          // home-metadata
+          // home-metadata-extra
           // {
-            modules = user-home-modules-list ++ (homes.users.${name}.modules or []) ++ (homes.modules or []);
+            modules =
+              user-home-modules-list
+              ++ (homes.users.${name}.modules or [])
+              ++ (homes.modules or []);
           });
       };
 
@@ -261,30 +275,25 @@ in {
 
               config = mkIf host-matches {
                 # Initialize user information.
-                andromeda = {
-                  home.extraOptions = {
-                    xdg = {
-                      enable = true;
-                      configFile = config.andromeda.home.configFile;
-                    };
-
-                    home = {
-                      file = config.andromeda.home.file;
-                      stateVersion = config.andromeda.home.stateVersion;
-                    };
+                andromeda.home.extraOptions = {
+                  xdg = {
+                    enable = mkDefault true;
+                    configFile = mkAliasDefinitions options.andromeda.home.configFile;
                   };
 
-                  user.${user-name}.home = {
-                    config =
-                      config.andromeda.home.extraOptions
-                      // {
-                        andromeda.user = {
-                          enable = true;
-                          name = mkDefault user-name;
-                        };
-                      };
+                  home = {
+                    stateVersion = mkDefault config.andromeda.home.stateVersion;
+                    file = mkAliasDefinitions options.andromeda.home.file;
+                  };
+
+                  andromeda.user = {
+                    enable = true;
+                    name = mkDefault user-name;
                   };
                 };
+
+                # Pass through user options.
+                andromeda.user.${user-name}.home.config = mkAliasDefinitions options.andromeda.home.extraOptions;
 
                 home-manager = {
                   users.${user-name} = mkAliasAndWrapDefinitions wrap-user-options options.andromeda.user;
