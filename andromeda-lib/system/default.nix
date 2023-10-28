@@ -133,7 +133,7 @@ in {
 
       modules =
         modules
-        ++ (optionals (!isNull path) [path])
+        ++ (optionals (path != null) [path])
         ++ (optionals (user-inputs ? home-manager) home-manager-modules)
         ++ [
           {
