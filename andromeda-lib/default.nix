@@ -108,13 +108,6 @@ core-inputs: user-options: let
         builtins.map
         (path: callPackageWith attrs path {})
         user-lib-modules;
-      # libs = builtins.map (path:
-      #   import path {
-      #     inherit (user-options) inputs;
-      #     andromeda-inputs = core-inputs;
-      #     lib = merge-shallow [base-lib {${andromeda-config.namespace} = user-lib;}];
-      #   })
-      # user-lib-modules;
     in
       merge-deep libs
   );

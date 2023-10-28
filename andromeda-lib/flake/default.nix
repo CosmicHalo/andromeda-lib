@@ -159,6 +159,7 @@ in rec {
 
         # Outputs
         outputsBuilder = outputs-builder;
+        sharedOverlays = builtins.attrValues overlays;
 
         _andromeda = {
           config = andromeda-config;
