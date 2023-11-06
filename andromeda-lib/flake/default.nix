@@ -50,7 +50,10 @@ in rec {
 
   mkFlake = full-flake-options: let
     custom-flake-options = flake.without-andromeda-options full-flake-options;
-    package-namespace = full-flake-options.package-namespace or andromeda-config.namespace or "internal";
+
+    # TODO: Address
+    package-namespace = full-flake-options.package-namespace or andromeda-config.namespace;
+    # package-namespace = full-flake-options.package-namespace or andromeda-config.namespace or "internal";
 
     ##############
     # Systems

@@ -30,7 +30,7 @@
         andromeda-inputs = core-inputs;
         lib = andromeda-lib.attrs.merge-shallow [
           base-lib
-          {internal = user-lib;}
+          {"${andromeda-config.namespace}" = user-lib;}
         ];
       };
       libs =

@@ -47,7 +47,7 @@ core-inputs: user-options: let
     // {
       inherit (user-options) src;
       root = raw-andromeda-config.root or user-options.src;
-      namespace = raw-andromeda-config.namespace or "internal";
+      namespace = raw-andromeda-config.namespace;
       meta = {
         name = raw-andromeda-config.meta.name or null;
         title = raw-andromeda-config.meta.title or null;
@@ -102,7 +102,10 @@ core-inputs: user-options: let
       attrs = {
         inherit (user-options) inputs;
         andromeda-inputs = core-inputs;
-        lib = merge-shallow [base-lib {${andromeda-config.namespace} = user-lib;}];
+        lib = merge-shallow [
+          base-lib
+          {${andromeda-config.namespace} = user-lib;}
+        ];
       };
       libs =
         builtins.map

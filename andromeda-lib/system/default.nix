@@ -4,7 +4,7 @@
   andromeda-lib,
   ...
 }: let
-  inherit (builtins) baseNameOf isNull;
+  inherit (builtins) baseNameOf;
   inherit (core-inputs.nixpkgs.lib) assertMsg fix hasInfix concatMap foldl optionals foldlAttrs optionalAttrs;
 
   virtual-systems = import ./virtual-systems.nix;
@@ -134,7 +134,7 @@ in {
       modules =
         modules
         ++ (optionals (path != null) [path])
-        ++ (optionals (user-inputs ? home-manager) home-manager-modules)
+        ++ home-manager-modules
         ++ [
           {
             # at this point we assume, that an evaluator at least
