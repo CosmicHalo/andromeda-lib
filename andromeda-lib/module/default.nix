@@ -47,11 +47,14 @@ in {
                 then "darwin"
                 else "linux";
 
+              isDarwin = andromeda-lib.system.is-darwin target;
+              isLinux = !isDarwin;
+
               # Replicates the specialArgs from Andromeda Lib's system builder.
               modified-args =
                 args
                 // {
-                  inherit system target format;
+                  inherit system target format isDarwin isLinux;
                   virtual = args.virtual or (andromeda-lib.system.get-virtual-system-type target != "");
                   systems = args.systems or {};
 
