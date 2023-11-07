@@ -11,7 +11,7 @@ inputs @ {
   has-user-name = (cfg.user.name or null) != null;
   # The module system chokes if it finds `osConfig` named in the module arguments
   # when being used in standalone home-manager. To remedy this, we have to refer to the arguments set directly.
-  os-user-home = inputs.osConfig.users.users.${cfg.name}.home or null;
+  os-user-home = inputs.osConfig.users.users.${cfg.user.name}.home or null;
 
   default-home-directory =
     if (os-user-home != null)

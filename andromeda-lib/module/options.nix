@@ -35,6 +35,13 @@ in rec {
   mkIntOpt' = mkOpt' types.int;
 
   ######
+  # INT
+  ######
+  mkEnumOpt = enum: mkOpt (types.enum enum);
+  ## Create a int NixOS module option without a description.
+  mkEnumOpt' = enum: mkOpt' (types.enum enum);
+
+  ######
   # NULL
   ######
 

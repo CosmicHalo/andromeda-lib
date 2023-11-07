@@ -6,14 +6,15 @@
 }: let
   inherit
     (core-inputs.nixpkgs.lib)
-    assertMsg
-    foldl
+    last
     head
-    concatMap
-    optional
     mkIf
-    mapAttrsToList
+    foldl
+    optional
+    assertMsg
+    concatMap
     mkDefault
+    mapAttrsToList
     mkAliasDefinitions
     mkAliasAndWrapDefinitions
     ;
@@ -44,10 +45,14 @@ in {
       raw-name-parts = builtins.split "@" target;
       name-parts = builtins.filter builtins.isString raw-name-parts;
 
-      user = builtins.elemAt name-parts 0;
+      user =
+        if builtins.length name-parts > 1
+        then (builtins.elemAt name-parts 0) + "@" + (builtins.elemAt name-parts 1)
+        else builtins.elemAt name-parts 0;
+
       host =
         if builtins.length name-parts > 1
-        then builtins.elemAt name-parts 1
+        then last name-parts
         else "";
     in {
       inherit user host;
