@@ -13,10 +13,10 @@ in {
     ## Create flake output packages.
     create-packages = {
       channels,
-      src ? user-packages-root,
-      pkgs ? channels.nixpkgs,
-      overrides ? {},
       alias ? {},
+      overrides ? {},
+      pkgs ? channels.nixpkgs,
+      src ? user-packages-root,
       package-namespace ? "internal",
     }: let
       user-packages = andromeda-lib.fs.get-default-nix-files-recursive src;

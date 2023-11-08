@@ -49,6 +49,20 @@ in rec {
   mkNullOpt' = type: mkOpt' (types.nullOr type);
 
   #########
+  # PACKAGE
+  #########
+
+  mkPackageOpt = mkOpt (types.package);
+  mkPackageOpt' = mkOpt' (types.package);
+
+  #########
+  # LIST
+  #########
+
+  mkListOpt = type: mkOpt (types.listOf type);
+  mkListOpt' = type: mkOpt' (types.listOf type);
+
+  #########
   # ENABLED
   #########
 

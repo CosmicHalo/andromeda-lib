@@ -15,6 +15,7 @@ in {
       create-modules = {
         alias ? {},
         overrides ? {},
+        channelName ? "nixpkgs",
         src ? "${user-modules-root}/nixos",
       }: let
         user-modules = andromeda-lib.fs.get-default-nix-files-recursive src;
@@ -35,8 +36,12 @@ in {
             # @NOTE(jakehamilton): home-manager *requires* modules to specify named arguments or it will not
             # pass values in. For this reason we must specify things like `pkgs` as a named attribute.
             ${metadata.name} = args @ {pkgs, ...}: let
-              system = args.system or args.pkgs.system;
               target = args.target or system;
+              system = args.system or args.pkgs.system;
+              channels = user-inputs.self.pkgs.${system};
+
+              isLinux = andromeda-lib.system.is-linux target;
+              isDarwin = andromeda-lib.system.is-darwin target;
 
               format = let
                 virtual-system-type = andromeda-lib.system.get-virtual-system-type target;
@@ -47,26 +52,25 @@ in {
                 then "darwin"
                 else "linux";
 
-              isDarwin = andromeda-lib.system.is-darwin target;
-              isLinux = !isDarwin;
-
               # Replicates the specialArgs from Andromeda Lib's system builder.
               modified-args =
                 args
                 // {
-                  inherit system target format isDarwin isLinux;
-                  virtual = args.virtual or (andromeda-lib.system.get-virtual-system-type target != "");
-                  systems = args.systems or {};
+                  inherit isDarwin isLinux;
+                  inherit system target format channels;
 
+                  pkgs = channels.${channelName};
                   lib = andromeda-lib.internal.system-lib;
-                  pkgs = user-inputs.self.pkgs.${system}.nixpkgs;
-
                   inputs = andromeda-lib.flake.without-src user-inputs;
+
+                  systems = args.systems or {};
+                  virtual = args.virtual or (andromeda-lib.system.get-virtual-system-type target != "");
                 };
               user-module = import metadata.path modified-args;
             in
               user-module // {_file = metadata.path;};
           };
+
         modules-without-aliases = foldl merge-modules {} modules-metadata;
         aliased-modules = mapAttrs (_name: value: modules-without-aliases.${value}) alias;
         modules = modules-without-aliases // aliased-modules // overrides;

@@ -70,10 +70,9 @@ in {
                         submoduleSupport.enable = true;
                         submoduleSupport.externalPackageInstall = cfg.useUserPackages;
 
+                        nix.package = config.nix.package;
                         home.username = config.users.users.${name}.name;
                         home.homeDirectory = config.users.users.${name}.home;
-
-                        nix.package = config.nix.package;
                       };
                     })
                   ]

@@ -114,6 +114,7 @@ in rec {
           extra-overlays = full-flake-options.overlays or [];
         };
       };
+
     channelsConfig = full-flake-options.channels-config or {};
 
     ##################

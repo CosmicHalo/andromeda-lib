@@ -46,7 +46,7 @@ in {
       name-parts = builtins.filter builtins.isString raw-name-parts;
 
       user =
-        if builtins.length name-parts > 1
+        if builtins.length name-parts > 2
         then (builtins.elemAt name-parts 0) + "@" + (builtins.elemAt name-parts 1)
         else builtins.elemAt name-parts 0;
 
@@ -88,9 +88,11 @@ in {
     }: let
       user-metadata = split-user-and-host name;
 
-      # @NOTE(jakehamilton): home-manager has trouble with `pkgs` recursion if it isn't passed in here.
-      pkgs = user-inputs.self.pkgs.${system}.${channelName} // {lib = home-lib;};
       lib = home-lib;
+      # @NOTE(jakehamilton): home-manager has trouble with `pkgs` recursion if it isn't passed in here.
+      pkgs =
+        user-inputs.self.pkgs.${system}.${channelName}
+        // {lib = home-lib;};
     in
       assert assertMsg (user-inputs ? home-manager) "In order to create home-manager configurations, you must include `home-manager` as a flake input.";
       assert assertMsg (user-metadata.host != "") "Andromeda Lib homes must be named with the format: user@system"; {
@@ -99,16 +101,18 @@ in {
         output = "homeConfigurations";
         modules = [path core-inputs.self.homeModules] ++ modules;
 
-        specialArgs = {
-          inherit name;
-          inherit (user-metadata) user host;
+        specialArgs =
+          specialArgs
+          // {
+            inherit name;
+            inherit (user-metadata) user host;
 
-          format = "home";
-          inputs = andromeda-lib.flake.without-src user-inputs;
+            format = "home";
+            inputs = andromeda-lib.flake.without-src user-inputs;
 
-          # home-manager has trouble with `pkgs` recursion if it isn't passed in here.
-          inherit pkgs lib;
-        };
+            # home-manager has trouble with `pkgs` recursion if it isn't passed in here.
+            inherit pkgs lib;
+          };
 
         builder = args:
           user-inputs.home-manager.lib.homeManagerConfiguration
@@ -132,7 +136,9 @@ in {
                   }
                 ];
 
-              extraSpecialArgs = specialArgs // args.specialArgs;
+              extraSpecialArgs =
+                specialArgs
+                // args.specialArgs;
             });
       };
 
