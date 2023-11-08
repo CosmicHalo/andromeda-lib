@@ -1,4 +1,5 @@
 # Andromeda Lib
+[![FlakeHub](https://img.shields.io/endpoint?url=https://flakehub.com/f/milkyway-org/andromeda-lib/badge)](https://flakehub.com/flake/milkyway-org/andromeda-lib)
 
 <a href="https://nixos.wiki/wiki/Flakes" target="_blank">
 	<img alt="Nix Flakes Ready" src="https://img.shields.io/static/v1?logo=nixos&logoColor=d8dee9&label=Nix%20Flakes&labelColor=5e81ac&message=Ready&color=d8dee9&style=for-the-badge">
@@ -36,6 +37,19 @@ Things added/modified:
 - Update `nixosModules`, `darwinModules`, and `homeModules` on flake to be more easily used within mkFlake.
   
 ## Get Started
+
+Add andromeda-lib to your `flake.nix`:
+
+```nix
+{
+  inputs.andromeda-lib.url = "https://flakehub.com/f/milkyway-org/andromeda-lib/*.tar.gz";
+
+  outputs = { self, andromeda-lib }: {
+    # Use in your outputs
+  };
+}
+
+```
 
 See the Snowfall Lib [Quickstart](https://snowfall.org/guides/lib/quickstart/) guide to start using Andromeda Lib.
 
