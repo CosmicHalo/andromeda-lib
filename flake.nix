@@ -77,9 +77,9 @@
         inherit mkLib mkFlake;
       };
 
-    nixosModules = ./modules/nixos/default.nix;
-    homeModules = ./modules/home/default.nix;
-    darwinModules = ./modules/darwin/default.nix;
+    nixosModules = import ./modules/nixos;
+    homeModules = import ./modules/home;
+    darwinModules = import ./modules/darwin;
 
     _andromeda = rec {
       raw-config = config;
