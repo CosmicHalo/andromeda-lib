@@ -17,7 +17,13 @@ in {
       extra-overlays ? [],
     }: channels: let
       user-overlays = andromeda-lib.fs.get-default-nix-files-recursive src;
-      create-overlay = overlay: import overlay (user-inputs // {inherit channels;});
+      create-overlay = overlay:
+        import overlay (user-inputs
+          // {
+            inherit channels;
+            inputs = user-inputs;
+          });
+
       user-packages-overlay = final: prev: let
         user-packages = andromeda-lib.package.create-packages {
           pkgs = final;
@@ -41,15 +47,14 @@ in {
       extra-overlays ? {},
     }: let
       fake-pkgs = {
+        lib = {};
         callPackage = x: x;
         isFakePkgs = true;
-        lib = {};
         system = "fake-system";
       };
 
-      user-overlays = andromeda-lib.fs.get-default-nix-files-recursive src;
-
       channel-systems = user-inputs.self.pkgs;
+      user-overlays = andromeda-lib.fs.get-default-nix-files-recursive src;
 
       user-packages-overlay = final: prev: let
         user-packages = andromeda-lib.package.create-packages {
@@ -69,7 +74,11 @@ in {
         name = builtins.unsafeDiscardStringContext (andromeda-lib.path.get-parent-directory file);
         overlay = final: prev: let
           channels = channel-systems.${prev.system};
-          user-overlay = import file (user-inputs // {inherit channels;});
+          user-overlay = import file (user-inputs
+            // {
+              inherit channels;
+              inputs = user-inputs;
+            });
           packages = user-packages-overlay final prev;
           prev-with-packages =
             if package-namespace == null
