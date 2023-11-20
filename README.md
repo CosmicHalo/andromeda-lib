@@ -31,9 +31,14 @@ to fit my personal use case.
 
 Things added/modified:
 
+- allow self in passed `user-inputs`
+- global `specialArgs` for `homes`
+- Pass inputs along with `overlays`
+- Pass `isLinux` & `isDarwin` to all modules
 - Merge `user-modules` with self defined `hosts` within `mkFlake`.
+- Add more `option` functions to help construct `options` more easily. [Module Options](https://github.com/milkyway-org/andromeda-lib/blob/main/andromeda-lib/module/options.nix) 
 - Extend `user` config to accept home options to be merged back with `home-manager`.
-- Add more `option` functions to help construct `options` more easily.
+- Allow for multiple `@` within `homes` names => `myhome@email.com@hostname`
 - Update `nixosModules`, `darwinModules`, and `homeModules` on flake to be more easily used within mkFlake.
   
 ## Get Started
