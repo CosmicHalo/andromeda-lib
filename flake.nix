@@ -5,14 +5,16 @@
   #* CORE
   #**********
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+    nixpkgs-stable.url = "https://flakehub.com/f/NixOS/nixpkgs/*.tar.gz";
 
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils.url = "https://flakehub.com/f/numtide/flake-utils/*.tar.gz";
     flake-utils-plus = {
       url = "github:lecoqjacob/flake-utils-plus";
       inputs.flake-utils.follows = "flake-utils";
     };
+
+    flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/0.1.*.tar.gz";
   };
 
   #***********************
@@ -71,6 +73,8 @@
     in
       lib.mkFlake flake-options;
   in {
+    schemas = inputs.flake-schemas.schemas;
+
     lib =
       inputs.flake-utils-plus.lib
       // {
