@@ -22,6 +22,7 @@ in {
           // {
             inherit channels;
             inputs = user-inputs;
+            lib = andromeda-lib.internal.system-lib;
           });
 
       user-packages-overlay = final: prev: let
@@ -78,6 +79,7 @@ in {
             // {
               inherit channels;
               inputs = user-inputs;
+              lib = andromeda-lib.internal.system-lib;
             });
           packages = user-packages-overlay final prev;
           prev-with-packages =

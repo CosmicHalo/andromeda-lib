@@ -12,7 +12,7 @@ in rec {
     without-self = flake-inputs: builtins.removeAttrs flake-inputs ["self"];
 
     # @TODO: Find if this is needed or not
-    without-andromeda-inputs = andromeda-lib.fp.compose without-src;
+    without-andromeda-inputs = without-src;
     # without-andromeda-inputs = andromeda-lib.fp.compose without-self without-src;
 
     ## Remove Andromeda-specific attributes so the rest can be safely passed to flake-utils-plus.
